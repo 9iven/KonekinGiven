@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
                 val responseBody = response.body()
                 if (responseBody != null && response.isSuccessful) {
 
-                    //  Map names to the ArrayList for display
+                    // Map names to the ArrayList for display
                     for (i in responseBody.data) {
                         userList.add(i.employeeName)
                     }
@@ -41,16 +41,21 @@ class MainActivity : AppCompatActivity() {
                     )
                     binding.lvNama.adapter = listAdapter
 
-                    //\Setup the Click Listener on the ListView
+                    // Setup the Click Listener on the ListView
                     binding.lvNama.setOnItemClickListener { _, _, position, _ ->
-                        // Get the exact user object based on item row index touched
                         val selectedUser = responseBody.data[position]
 
-                        // Create transit path to UserDetailActivity carrying the user ID
-                        val intent = Intent(this@MainActivity, UserDetailActivity::class.java)
-                        intent.putExtra("USER_ID", selectedUser.id)
+                        // Kirim data lengkap ke UserDetailActivity agar data tetap tampil saat server 429
+                        val intent = Intent(this@MainActivity, UserDetailActivity::class.java).apply {
+                            putExtra("USER_ID", selectedUser.id)
+                            putExtra("USER_NAME", selectedUser.employeeName)
+                            putExtra("USER_SALARY", selectedUser.employeeSalary)
+                            putExtra("USER_AGE", selectedUser.employeeAge)
+                        }
                         startActivity(intent)
                     }
+                } else {
+                    Toast.makeText(this@MainActivity, "Server Respon: ${response.code()}", Toast.LENGTH_LONG).show()
                 }
             }
 

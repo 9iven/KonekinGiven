@@ -19,6 +19,17 @@ class UserDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val userId = intent.getIntExtra("USER_ID", -1)
+        val userName = intent.getStringExtra("USER_NAME")
+        val userSalary = intent.getIntExtra("USER_SALARY", -1)
+        val userAge = intent.getIntExtra("USER_AGE", -1)
+
+        // Tampilkan data dari intent terlebih dahulu agar UI tidak kosong jika server kena rate limit 429
+        if (!userName.isNullOrEmpty()) {
+            binding.tvDetailId.text = "ID: $userId"
+            binding.tvDetailName.text = userName
+            binding.tvDetailSalary.text = "Gaji: $$userSalary"
+            binding.tvDetailAge.text = "Umur: $userAge Tahun"
+        }
 
         if (userId != -1) {
             fetchUserDetail(userId)
@@ -36,25 +47,23 @@ class UserDetailActivity : AppCompatActivity() {
                 if (response.isSuccessful && responseBody != null) {
                     val employee = responseBody.data
 
-                    binding.tvDetailId.text = "ID Karyawan: ${employee.id}"
+                    binding.tvDetailId.text = "ID: ${employee.id}"
                     binding.tvDetailName.text = employee.employeeName
                     binding.tvDetailSalary.text = "Gaji: $${employee.employeeSalary}"
                     binding.tvDetailAge.text = "Umur: ${employee.employeeAge} Tahun"
                 } else {
-                    // Menampilkan kode error asli dari server (contoh: 429 atau 404)
+                    // Menampilkan pesan kode error server (misal 429 Rate Limit) tanpa mengosongkan UI
                     Toast.makeText(this@UserDetailActivity,
-                        "Gagal memuat data. Server Respon: ${response.code()}",
-                        Toast.LENGTH_LONG).show()
+                        "Server Respon: ${response.code()} (Rate Limit). Data dimuat dari list.",
+                        Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<UserDetailResponse>, t: Throwable) {
-                // Menampilkan detail error koneksi
                 Toast.makeText(this@UserDetailActivity,
-                    "Koneksi Error: ${t.localizedMessage}",
-                    Toast.LENGTH_LONG).show()
+                    "Koneksi Error: ${t.localizedMessage}. Data dimuat dari list.",
+                    Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 }
